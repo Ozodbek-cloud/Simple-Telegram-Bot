@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Ctx, Start, Update, Message, Hears, On } from 'nestjs-telegraf';
+import { Ctx, Start, Update, Message, Hears, On, Command } from 'nestjs-telegraf';
 import { userState } from 'src/Common/user-state';
 import { PrismaService } from 'src/database/prisma.service';
 import { Context } from 'telegraf';
@@ -9,7 +9,20 @@ import { keyboard } from 'telegraf/typings/markup';
 @Injectable()
 export class BotUpdate {
   constructor(private prismaService: PrismaService) {}
-   @Start()
+
+   @Command("/info")
+  async oldUser(@Ctx() ctx:Context){
+    let telegramId = await ctx.from!.id
+    let olduser = await this.prismaService.user.findFirst({where:{telegramId}})
+    if(!olduser) ctx.reply("bu foydalanuvchi hali ro'yxatdan o'tmagan /start ni bosing")
+  
+      ctx.reply(`Ro'yxat:🙋‍♂️ Ism: ${olduser!.firstname}\n✅Familiya: ${olduser!.lastname}\nYosh:${olduser!.age}\n📲Tel: ${olduser!.contact}`)
+  
+  
+    }
+
+
+  @Start()
    async start(@Ctx() ctx: Context) {
      userState.set(ctx.from!.id, {step: "firstname", data: {}})
      ctx.reply("Ismingizni Kiriting")
@@ -60,15 +73,6 @@ export class BotUpdate {
       
   }
  
-  @Hears("Info")
-  async getInfo(@Ctx() ctx: Context) {
-    let data = await this.prismaService.user.findFirst({
-      where: {
-        telegramId: ctx.from!.id
-      }
-    })
-    ctx.reply(`🙋‍♂️ Ism: ${data!.firstname}\n✅Familiya: ${data!.lastname}\nYosh:${data!.age}\n📲Tel: ${data!.contact}`)
-  }
 
   @On('contact')
   async onContact(@Ctx() ctx: Context) {
@@ -86,14 +90,16 @@ export class BotUpdate {
             }
           })
 
+          
+
           ctx.reply('✅ Malumot Saqlandi', {
              reply_markup: {
               keyboard: [
                 [
-                  {text: "ℹ️ Info"}, {text: "🆘 Help"}
+                  {text: "/info"}, {text: "🆘 Help"}
                 ],
                 [
-                  {text: '🖼 Sertification'}, {text: "🚩 Others"}
+                  {text: 'Sertification'}, {text: "🚩 Others"}
                 ]
               ],
               resize_keyboard: true,
