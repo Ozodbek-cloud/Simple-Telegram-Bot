@@ -5,7 +5,7 @@ CREATE TABLE "User" (
     "lastname" TEXT NOT NULL,
     "age" INTEGER NOT NULL,
     "contact" TEXT NOT NULL,
-    "telegramId" INTEGER NOT NULL,
+    "telegramId" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
