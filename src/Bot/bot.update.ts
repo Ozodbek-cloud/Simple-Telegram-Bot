@@ -1,12 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { Ctx, Start, Update, Message, Hears, On } from 'nestjs-telegraf';
 import { userState } from 'src/Common/user-state';
+import { PrismaService } from 'src/database/prisma.service';
 import { Context } from 'telegraf';
 import { keyboard } from 'telegraf/typings/markup';
 
 @Update()
 @Injectable()
 export class BotUpdate {
+  constructor(private prismaService: PrismaService) {}
    @Start()
    async start(@Ctx() ctx: Context) {
      userState.set(ctx.from!.id, {step: "firstname", data: {}})
@@ -57,7 +59,16 @@ export class BotUpdate {
     }
       
   }
-
+ 
+  @Hears("Info")
+  async getInfo(@Ctx() ctx: Context) {
+    let data = await this.prismaService.user.findFirst({
+      where: {
+        telegramId: ctx.from!.id
+      }
+    })
+    ctx.reply(`🙋‍♂️ Ism: ${data!.firstname}\n✅Familiya: ${data!.lastname}\nYosh:${data!.age}\n📲Tel: ${data!.contact}`)
+  }
 
   @On('contact')
   async onContact(@Ctx() ctx: Context) {
@@ -65,8 +76,32 @@ export class BotUpdate {
     if('contact' in ctx.message!) {
           let phone = ctx.message.contact.phone_number
           let {firstname, lastname, age} = state!.data
+          await this.prismaService.user.create({
+            data: {
+              firstname: firstname!,
+              lastname: lastname!,
+              age: age!,
+              contact: phone,
+              telegramId: ctx.from!.id
+            }
+          })
 
-          ctx.reply('✅ Malumot Saqlandi')
+          ctx.reply('✅ Malumot Saqlandi', {
+             reply_markup: {
+              keyboard: [
+                [
+                  {text: "ℹ️ Info"}, {text: "🆘 Help"}
+                ],
+                [
+                  {text: '🖼 Sertification'}, {text: "🚩 Others"}
+                ]
+              ],
+              resize_keyboard: true,
+              one_time_keyboard: true
+             }
+          })
     }
+    console.log(ctx.from!.id)
   }
+
 }
