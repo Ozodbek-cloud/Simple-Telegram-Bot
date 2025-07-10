@@ -1,4 +1,4 @@
-type UserState = 'firstname' | 'lastname' | 'age' | 'contact'
+type UserState = 'subscription'|  'country' | 'firstname' | 'lastname' | 'age' | 'contact'
 
 interface UserData {
     step: UserState
@@ -6,6 +6,7 @@ interface UserData {
         firstname?: string
         lastname?: string
         age?: number
+        country?: string
         contact?: string
     }
 }

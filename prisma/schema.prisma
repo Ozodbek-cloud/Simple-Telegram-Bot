@@ -13,6 +13,7 @@ model User {
   lastname   String
   age        Int
   contact    String
+  country    String
   telegramId BigInt     
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
